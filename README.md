@@ -24,3 +24,4 @@ Provided data is not included in this repository due to its size. Data has to go
 ## Decisions & Assumptions
 - Savings [%] depend on terminal and section width, default section width is 25 cm (finest, most savings)
 - Big dataset is visualized using a bounding box for smoother pan/zoom
+- CCI folder sometines contains a .shp in addition to the .xml -> zip the whole folder
