@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hof Hans</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <h1>Hof Hans</h1>
+  <nav class="tabs" aria-label="Views">
+    <button id="tab-fields" class="tab active" type="button">Fields &amp; Results</button>
+    <button id="tab-raw" class="tab" type="button">Raw Data</button>
+  </nav>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+    <section id="panel-fields">
+      <button id="list-toggle" class="list-toggle" type="button" aria-expanded="true">
+        <span>Fields (<span id="field-count">0</span>)</span>
+        <span id="list-icon" class="toggle-icon">&minus;</span>
+      </button>
+      <ul id="field-list" class="field-list"></ul>
+
+      <div class="controls">
+        <label>Terminal
+          <select id="terminal"></select>
+        </label>
+        <label>Section
+          <select id="section"></select>
+        </label>
+      </div>
+
+      <hr class="divider">
+
+      <h2 class="panel-title">Results</h2>
+      <div class="results">
+        <div class="savings-big" id="res-savings">&ndash;</div>
+        <div class="savings-label">herbicide saved</div>
+        <div class="res-line" id="res-spray"></div>
+        <div class="res-line" id="res-plants"></div>
+        <div class="res-note" id="res-note" hidden></div>
+      </div>
+
+      <button id="download" class="download" type="button">&#11015; Download map</button>
+    </section>
+    <section id="panel-raw" hidden>
+      <button id="raw-list-toggle" class="list-toggle" type="button" aria-expanded="true">
+        <span>Fields (<span id="raw-count">0</span>)</span>
+        <span id="raw-list-icon" class="toggle-icon">&minus;</span>
+      </button>
+      <ul id="raw-field-list" class="field-list"></ul>
+
+      <hr class="divider">
+
+      <h2 class="panel-title">Info</h2>
+      <div id="raw-info" class="raw-info"></div>
+      <p class="res-note" id="raw-note">Detection data is coming in a later step.</p>
+    </section>
+  </aside>
+
+  <div id="map">
+    <div id="map-note" class="map-note" hidden></div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
