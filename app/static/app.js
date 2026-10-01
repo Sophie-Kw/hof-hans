@@ -47,7 +47,7 @@ async function init() {
 
 // small "N" + arrow; the map is never rotated, so a static arrow is enough
 const NorthArrow = L.Control.extend({
-  options: { position: "bottomright" },
+  options: { position: "bottomleft" },
   onAdd() {
     const div = L.DomUtil.create("div", "north-arrow");
     div.innerHTML =
@@ -76,8 +76,8 @@ function initMap() {
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map);
-  L.control.scale({ position: "bottomleft" }).addTo(map);
   map.addControl(new NorthArrow());
+  L.control.scale({ position: "bottomleft" }).addTo(map);
   map.addControl(new MapLegend());
   layers.all = L.layerGroup().addTo(map);
   layers.current = L.layerGroup().addTo(map);

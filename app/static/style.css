@@ -59,6 +59,16 @@ body {
 }
 #map { flex: 1; min-width: 0; position: relative; }
 .leaflet-container { background: #e5e7eb; }
+.leaflet-bottom.leaflet-left {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.leaflet-bottom.leaflet-left .leaflet-control {
+  float: none;
+  clear: none;
+  margin: 0 0 10px;
+}
 .placeholder { padding: 12px; color: #6b7280; font-size: 14px; }
 
 /* collapsible field list */
