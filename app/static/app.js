@@ -11,8 +11,10 @@ const state = {
 let DATA = null;
 let fieldById = {};
 let map = null;
-let layers = { all: null, current: null };
+let layers = { all: null, current: null, raw: null };
 let mapSeq = 0; // guards against out-of-order map responses
+let rawMapSeq = 0;
+let rawMapTimer = null;
 
 const $ = (id) => document.getElementById(id);
 const fmtHa = (n) => (n == null ? "–" : (Math.round(n * 10) / 10).toFixed(1));
@@ -81,7 +83,9 @@ function initMap() {
   map.addControl(new MapLegend());
   layers.all = L.layerGroup().addTo(map);
   layers.current = L.layerGroup().addTo(map);
+  layers.raw = L.layerGroup().addTo(map);
   map.on("click", onMapClick);
+  map.on("moveend zoomend", scheduleRawMap);
 }
 
 function buildFieldList() {
@@ -254,10 +258,13 @@ function buildRawList() {
 
 function selectRawField(id) {
   const f = fieldById[id];
+  state.fieldId = id;
+  rawMapSeq++;
   document.querySelectorAll("#raw-field-list li").forEach((el) =>
     el.classList.toggle("active", el.dataset.id === id)
   );
   layers.current.clearLayers();
+  layers.raw.clearLayers();
   if (f.border) {
     L.geoJSON(f.border, { style: SEL_BORDER_STYLE }).addTo(layers.current);
     map.fitBounds(L.geoJSON(f.border).getBounds(), { padding: [20, 20] });
@@ -274,7 +281,70 @@ function selectRawField(id) {
     ` · ${fmtNum(f.plants_in_field)} detections`;
   info.append(title, meta);
   const note = $("map-note");
-  note.textContent = "Detection data is coming in a later step.";
+  note.textContent = "Loading detections...";
+  note.hidden = false;
+  scheduleRawMap();
+}
+
+function scheduleRawMap() {
+  if (state.tab !== "raw" || !state.fieldId) return;
+  clearTimeout(rawMapTimer);
+  rawMapTimer = setTimeout(loadRawMap, 200);
+}
+
+async function loadRawMap() {
+  if (state.tab !== "raw" || !state.fieldId) return;
+  const bounds = map.getBounds();
+  const bbox = [bounds.getWest(), bounds.getSouth(),
+    bounds.getEast(), bounds.getNorth()].join(",");
+  const seq = ++rawMapSeq;
+  let res;
+  try {
+    const response = await fetch(
+      `/api/raw/${state.fieldId}/detections?bbox=${bbox}&zoom=${map.getZoom()}`
+    );
+    if (!response.ok) throw new Error(`raw map request failed: ${response.status}`);
+    res = await response.json();
+  } catch (err) {
+    console.error("raw map fetch failed", err);
+    return;
+  }
+  if (seq !== rawMapSeq || state.tab !== "raw") return;
+
+  layers.raw.clearLayers();
+  if (res.mode === "grid") {
+    const maxCount = Math.max(
+      ...res.fc.features.map((feature) => feature.properties.count || 1)
+    );
+    L.geoJSON(res.fc, {
+      style: (feature) => {
+        const count = feature.properties.count || 1;
+        const intensity = Math.sqrt(count / maxCount);
+        return {
+          color: "#ffffff",
+          weight: 0.2,
+          opacity: 0.25,
+          fillColor: "#f97316",
+          fillOpacity: 0.35 + intensity * 0.6,
+        };
+      },
+    }).addTo(layers.raw);
+  } else {
+    L.geoJSON(res.fc, {
+      pointToLayer: (_feature, latlng) => L.circleMarker(latlng, {
+        radius: 3,
+        color: "#7c2d12",
+        weight: 1,
+        fillColor: "#f97316",
+        fillOpacity: 0.55,
+      }),
+    }).addTo(layers.raw);
+  }
+
+  const note = $("map-note");
+  note.textContent = res.mode === "grid"
+    ? `Density grid representing ${res.total.toLocaleString("en-US")} detections in visible cells (${res.shown.toLocaleString("en-US")} cells), zoom ${map.getZoom()}. Points appear at maximum zoom when the area is sparse enough.`
+    : `Showing ${res.shown.toLocaleString("en-US")} detections at zoom ${map.getZoom()}.`;
   note.hidden = false;
 }
 
@@ -287,6 +357,7 @@ function setTab(tab) {
   $("tab-raw").classList.toggle("active", tab === "raw");
   layers.all.clearLayers();
   if (tab === "fields") {
+    layers.raw.clearLayers();
     drawAllBorders();
     drawCurrent({ fit: true });
   } else {

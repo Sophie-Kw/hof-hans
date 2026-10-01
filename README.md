@@ -18,13 +18,14 @@ expects.
 **Raw Data tab (lightweight, first step of the big detection view)**
 - field 19 (Hohe Breite, 74.3 ha, 1,409,404 detections) is selectable, all
   other fields are greyed out with "no raw data"
-- field 19 border on the map + info block from `field.yaml`
-- the raw detection files in `data/big/` (~290 MB) are not accessed yet
+- field 19 border and bbox-loaded detection map + info block from `field.yaml`
+- dense views use aggregated cells; close views use individual detections
 
 ## Technologies
 - Python / Flask (backend)
 - Leaflet (map, via CDN) with OpenStreetMap tiles
 - pyshp + PyYAML for reading the shapefiles and `field.yaml`
+- SQLite R-tree cache for fast raw-data bbox queries
 - Docker 
 
 ## Getting Started (local run)
@@ -40,7 +41,9 @@ python -m app
 
 Then open http://127.0.0.1:8080.
 
-Note: the map tiles and the Leaflet scripts are loaded from the internet, so internet connection is needed for the map background.
+Note: the first Raw Data request builds a local cache in `.cache/`; later bbox
+requests reuse it. The map tiles and the Leaflet scripts are loaded from the
+internet, so internet connection is needed for the map background.
 
 ## Data
 

@@ -87,6 +87,20 @@ def create_app() -> Flask:
             "fc": {"type": "FeatureCollection", "features": features},
         })
 
+    @app.get("/api/raw/<field_id>/detections")
+    def api_raw_detections(field_id: str):
+        _get_field(field_id)
+        if field_id not in app.data["raw_fields"]:
+            abort(404)
+        try:
+            values = [float(value) for value in request.args["bbox"].split(",")]
+            zoom = int(request.args.get("zoom", 14))
+        except (KeyError, TypeError, ValueError):
+            abort(400, description="bbox must be min_lon,min_lat,max_lon,max_lat")
+        if len(values) != 4 or values[0] >= values[2] or values[1] >= values[3]:
+            abort(400, description="invalid bbox")
+        return jsonify(geo.get_raw_points(field_id, tuple(values), zoom))
+
     @app.get("/api/fields/<field_id>/download")
     def api_download(field_id: str):
         field = _get_field(field_id)
