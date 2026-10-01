@@ -2,3 +2,4 @@ flask>=3.0
 pyshp>=2.3
 PyYAML>=6.0
 Shapely>=2.0
+waitress>=3.0

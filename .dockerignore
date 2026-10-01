@@ -1,0 +1,11 @@
+# geodata - mounted at runtime, must never end up in the image
+data/
+
+# local environment / build artifacts
+.git/
+.venv/
+.cache/
+__pycache__/
+*.pyc
+.DS_Store
+AGENTS.md

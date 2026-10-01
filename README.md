@@ -5,30 +5,59 @@ detection results, lets him pick his sprayer terminal and section width, and
 downloads the spray map in the exact format and folder structure his terminal
 expects.
 
-## Features
+## Getting Started (Docker)
 
-**Fields & Results tab**
-- overview of all fields on the left
-- interactive map on the right
-- terminal + section width selection (9 terminals, 25/50/100/300 cm)
-- results panel: herbicide saved in %, sprayed area, plants + coverage
-- download button: ZIP with the terminal folder (e.g. `John_Deere/`) and boder shapefile (`Field_boder/`),
-  ready for the USB stick
+Docker (with the `docker compose` plugin) is the only requirement.
 
-**Raw Data tab (lightweight, first step of the big detection view)**
-- field 19 (Hohe Breite, 74.3 ha, 1,409,404 detections) is selectable, all
-  other fields are greyed out with "no raw data"
-- field 19 border and bbox-loaded detection map + info block from `field.yaml`
-- dense views use aggregated cells; close views use individual detections
+1. Put the data into place (see [Data](#data)).
+2. Start:
 
-## Technologies
-- Python / Flask (backend)
-- Leaflet (map, via CDN) with OpenStreetMap tiles
-- pyshp + PyYAML for reading the shapefiles and `field.yaml`
-- SQLite R-tree cache for fast raw-data bbox queries
-- Docker 
+   ```
+   docker compose up --build
+   ```
 
-## Getting Started (local run)
+3. Open http://localhost:8080 and stop with `Ctrl+C` (or `docker compose down`).
+
+<!-- Notes:
+- the first Raw Data request on field 19 builds an internal SQLite cache from
+  the ~1.4 M detection points (can take a minute or two). It is stored in the
+  Docker volume `raw-cache`, so later starts reuse it; it is rebuilt
+  automatically if the source shapefile changes.
+- the map background (tiles) and the Leaflet scripts are loaded from the
+  internet, so an internet connection is needed.
+- port 8080 must be free (close a local development instance if one is running). -->
+
+## Data
+
+The geodata is **not in the repository** and not part of the Docker image. It is provided
+separately. Extract it so that the repo looks like:
+
+```
+hof-hans/
+├── app/
+├── data/                     
+│   ├── fields/field_01 … field_20/
+│   ├── big/field_19_detections.{shp,shx,dbf,prj,cpg}
+│   └── terminals.json
+├── Dockerfile
+├── compose.yaml
+└── README.md
+```
+
+The app only reads `data/`, it never writes to it. Details on the data
+format: `data/README.md`.
+
+If the data (or parts of it) is missing, the app does not start with an
+empty map but fails with a clear message, e.g.:
+
+```
+RuntimeError: The data folder is missing or incomplete:
+  - missing directory: /app/data/fields
+Put the geodata into the 'data' folder next to compose.yaml (fields/ and
+terminals.json, see README.md) and start again.
+```
+
+## Local run without Docker
 
 Python 3.11+ is required.
 
@@ -39,22 +68,11 @@ pip install -r requirements.txt
 python -m app
 ```
 
-Then open http://127.0.0.1:8080.
-
-Note: the first Raw Data request builds a local cache in `.cache/`; later bbox
-requests reuse it. The map tiles and the Leaflet scripts are loaded from the
-internet, so internet connection is needed for the map background.
-
-## Data
-
-See `data/README.md`. The app only reads `data/`, it never writes to it.
-The raw detection files in `data/big/` are not accessed by the app at this
-stage.
+Then open http://127.0.0.1:8080. The raw-data cache is then built in
+`.cache/` (git-ignored) instead of the Docker volume.
 
 ## Decisions & Assumptions
-- savings [%] depend on section width; default section width is
-  25 cm (finest, most savings)
 - the displayed map is always the John Deere map of the field; the selected
-  terminal only changes the downloaded map folder
+  terminal only changes the savings numbers and the downloaded map folder
 - the download ZIP contains the whole map folder of the selected terminal
-- the full big-detection map over `data/big/` is planned for a later step
+  plus the field border, so it works as-is on the terminal

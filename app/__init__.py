@@ -18,6 +18,7 @@ FIELD_KEYS = ("id", "name", "file_name", "area_ha", "flight_date",
 
 
 def create_app() -> Flask:
+    geo.validate_data()
     app = Flask(__name__)
     app.data = {
         "fields": geo.load_fields(),

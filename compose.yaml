@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      # the geodata, read-only; see README.md for where it has to come from
+      - ./data:/app/data:ro
+      # generated SQLite R-tree cache for the raw detection points;
+      # rebuilt automatically if the source shapefile changes
+      - raw-cache:/app/.cache
+
+volumes:
+  raw-cache:

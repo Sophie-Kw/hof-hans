@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import sys
 import threading
 from math import cos, radians
 from pathlib import Path
@@ -24,6 +25,25 @@ CACHE_DIR = DATA_DIR.parent / ".cache"
 # The displayed map is always the John Deere map of the field. The selected
 # terminal only changes the savings numbers and the downloadable map folder.
 MAP_TYPE = "John_Deere"
+
+
+def validate_data() -> None:
+    """Fail early with a clear message if the geodata is missing."""
+    problems = []
+    if not (DATA_DIR / "fields").is_dir():
+        problems.append(f"missing directory: {DATA_DIR / 'fields'}")
+    if not (DATA_DIR / "terminals.json").is_file():
+        problems.append(f"missing file: {DATA_DIR / 'terminals.json'}")
+    if problems:
+        raise RuntimeError(
+            "The data folder is missing or incomplete:\n  - "
+            + "\n  - ".join(problems)
+            + "\nPut the geodata into the 'data' folder next to compose.yaml "
+              "(fields/ and terminals.json, see README.md) and start again."
+        )
+    if not BIG_DIR.is_dir():
+        print(f"Warning: {BIG_DIR} not found - the Raw Data tab stays empty.",
+              file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
