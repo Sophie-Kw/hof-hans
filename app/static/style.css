@@ -14,39 +14,65 @@ body {
 
 /* top bar with tabs */
 .topbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 10px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 18px;
+  background: #050505;
+  border-bottom: 1px solid #262626;
+  color: #fff;
 }
 .topbar h1 {
   margin: 0;
-  font-size: 18px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 23px;
+  letter-spacing: 0.02em;
 }
-.tabs { display: flex; gap: 8px; }
+.tabs {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #404040;
+  border-radius: 999px;
+  background: #171717;
+}
 .tab {
-  padding: 7px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: #d4d4d4;
   font-size: 14px;
+  font-weight: 550;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
 }
-.tab:hover { background: #f3f4f6; }
-.tab.active { background: #166534; border-color: #166534; color: #fff; }
-.tab.active:hover { background: #14532d; }
+.tab:hover { background: #262626; color: #fff; }
+.tab.active { background: #404040; border-color: #404040; color: #a4cc60; }
+.tab.active:hover { background: #4a4a4a; border-color: #4a4a4a; }
+.account {
+  margin-left: auto;
+  padding: 9px 4px;
+  border: none;
+  background: transparent;
+  color: #d4d4d4;
+  font-size: 15px;
+  cursor: pointer;
+}
+.account:hover { color: #fff; }
 
 /* 2-column layout */
 .layout { flex: 1; display: flex; min-height: 0; }
 .sidebar {
   width: 340px;
   min-width: 280px;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
+  background: #303030;
+  border-right: 1px solid #3f3f46;
+  color: #f5f5f5;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -63,6 +89,7 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  margin-left: 10px;
 }
 .leaflet-bottom.leaflet-left .leaflet-control {
   float: none;
@@ -78,21 +105,33 @@ body {
   align-items: center;
   width: 100%;
   padding: 10px 12px;
-  background: #f3f4f6;
+  background: #262626;
   border: none;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #3f3f46;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #374151;
+  color: #e5e5e5;
   cursor: pointer;
+}
+.list-header {
+  width: 100%;
+  padding: 10px 12px;
+  background: #262626;
+  border-bottom: 1px solid #a3a3a3;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e5e5e5;
 }
 .toggle-icon { font-size: 16px; line-height: 1; }
 .field-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  background: #171717;
   overflow-y: auto;
   max-height: 38vh;
   min-height: 100px;
@@ -100,50 +139,64 @@ body {
 .field-list.collapsed { display: none; }
 .field-list li {
   padding: 8px 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #3f3f46;
   cursor: pointer;
 }
-.field-list li:hover { background: #f9fafb; }
-.field-list li.active { background: #dcfce7; box-shadow: inset 3px 0 0 #16a34a; }
+.field-list li:hover { background: #333333; }
+.field-list li.active {
+  background: #404040;
+  color: #a4cc60;
+  box-shadow: inset 3px 0 0 #a4cc60;
+}
+.field-list li.active .fmeta { color: #b0bd98; }
 .field-list li.disabled { opacity: 0.45; cursor: default; }
-.field-list li.disabled:hover { background: #fff; }
+.field-list li.disabled:hover { background: #303030; }
 .fname { font-weight: 500; }
-.fmeta { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.fmeta { font-size: 12px; color: #a3a3a3; margin-top: 2px; }
 
 /* terminal / section controls */
-.controls { padding: 10px 12px; display: grid; gap: 8px; }
+.controls {
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid #a3a3a3;
+}
 .controls label {
   display: grid;
   grid-template-columns: 74px 1fr;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #d4d4d4;
 }
 .controls select {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #525252;
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
+  background: #262626;
+  color: #f5f5f5;
 }
 
-.divider { border: none; border-top: 1px solid #e5e7eb; margin: 10px 12px; }
+.divider { border: none; border-top: 1px solid #a3a3a3; margin: 10px 12px; }
 .panel-title {
   margin: 0 12px 8px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #374151;
+  color: #d4d4d4;
 }
 
 /* results panel */
 .results { padding: 0 12px 8px; }
 .savings-big { font-size: 36px; font-weight: 700; line-height: 1.1; }
-.savings-label { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
-.res-line { font-size: 14px; color: #374151; }
+.savings-label { font-size: 13px; color: #a3a3a3; margin-bottom: 10px; }
+.res-line { font-size: 14px; color: #d4d4d4; }
 .res-note {
   margin: 10px 12px 0;
   padding: 8px 10px;
@@ -158,19 +211,19 @@ body {
 .download {
   margin: auto 12px 12px;
   padding: 11px;
-  background: #166534;
-  color: #fff;
+  background: #a4cc60;
+  color: #111827;
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   font-size: 15px;
   cursor: pointer;
 }
-.download:hover { background: #14532d; }
+.download:hover { background: #8eaf50; }
 
 /* raw data tab */
 .raw-info { padding: 4px 12px 8px; }
 .raw-title { font-weight: 600; font-size: 16px; }
-.raw-meta { font-size: 13px; color: #6b7280; margin-top: 4px; }
+.raw-meta { font-size: 13px; color: #a3a3a3; margin-top: 4px; }
 
 /* small note card on the map */
 .map-note {
@@ -207,7 +260,7 @@ body {
 }
 .na-arrow {
   margin-top: 2px;
-  font-size: 10px;
+  font-size: 12px;
   color: #111827;
 }
 
@@ -217,7 +270,7 @@ body {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 12px;
   color: #374151;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
@@ -250,7 +303,7 @@ body {
 }
 .lg-density-title {
   margin-top: 5px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 .lg-gradient {
@@ -264,6 +317,6 @@ body {
   display: flex;
   justify-content: space-between;
   width: 120px;
-  font-size: 10px;
+  font-size: 12px;
   color: #6b7280;
 }

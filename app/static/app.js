@@ -322,8 +322,7 @@ function selectRawField(id) {
   const meta = document.createElement("div");
   meta.className = "raw-meta";
   meta.textContent =
-    `${fmtHa(f.area_ha)} ha · ${f.plant_type} · flight ${fmtDate(f.flight_date)}` +
-    ` · ${fmtNum(f.plants_in_field)} detections`;
+    `${fmtNum(f.plants_in_field)} detections`;
   info.append(title, meta);
   const note = $("map-note");
   note.textContent = "Loading detections...";
@@ -428,11 +427,6 @@ function setTab(tab) {
 // ---------------------------------------------------------------------------
 
 function bindUI() {
-  $("list-toggle").addEventListener("click", () => {
-    const collapsed = $("field-list").classList.toggle("collapsed");
-    $("list-toggle").setAttribute("aria-expanded", String(!collapsed));
-    $("list-icon").textContent = collapsed ? "+" : "−";
-  });
   $("raw-list-toggle").addEventListener("click", () => {
     const collapsed = $("raw-field-list").classList.toggle("collapsed");
     $("raw-list-toggle").setAttribute("aria-expanded", String(!collapsed));

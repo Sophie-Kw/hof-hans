@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hof Hans</title>
+  <title>SAMgate</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <header class="topbar">
-  <h1>Hof Hans</h1>
+  <h1>SAMgate</h1>
   <nav class="tabs" aria-label="Views">
     <button id="tab-fields" class="tab active" type="button">Fields &amp; Results</button>
     <button id="tab-raw" class="tab" type="button">Raw Data</button>
   </nav>
+  <button class="account" type="button" aria-label="Open Hans account">Hans</button>
 </header>
 
 <main class="layout">
   <aside class="sidebar">
     <section id="panel-fields">
-      <button id="list-toggle" class="list-toggle" type="button" aria-expanded="true">
+      <div class="list-header">
         <span>Fields (<span id="field-count">0</span>)</span>
-        <span id="list-icon" class="toggle-icon">&minus;</span>
-      </button>
+      </div>
       <ul id="field-list" class="field-list"></ul>
 
       <div class="controls">
