@@ -49,15 +49,9 @@ The raw detection files in `data/big/` are not accessed by the app at this
 stage.
 
 ## Decisions & Assumptions
-- savings [%] depend on terminal and section width; default section width is
+- savings [%] depend on section width; default section width is
   25 cm (finest, most savings)
-- detection point maps (Amazone) can be huge (field 19: ~1 M points), so the
-  map shows a uniform sample of at most 20,000 points and says
-  "showing X of Y points"
-- the CCI folder sometimes contains a `.shp` in addition to the `.xml` ->
-  the ZIP contains the whole folder; the map prefers the `.shp` when both exist
-- CCI / Fendt_XML maps without a `.shp` are drawn from the `TASKDATA.xml`
-  (ISO 11783 TaskData; its points already carry WGS84 coordinates). Obstacle
-  polygons are skipped, and maps with more than 20,000 vertices are shown as
-  a simplified outline
+- the displayed map is always the John Deere map of the field; the selected
+  terminal only changes the downloaded map folder
+- the download ZIP contains the whole map folder of the selected terminal
 - the full big-detection map over `data/big/` is planned for a later step
