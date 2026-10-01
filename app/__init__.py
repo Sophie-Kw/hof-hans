@@ -14,7 +14,7 @@ from . import geo
 SECTIONS = [25, 50, 100, 300]  # sprayer section widths in cm
 FIELD_KEYS = ("id", "name", "file_name", "area_ha", "flight_date",
               "plant_type", "plants_in_field", "covered_area_ha",
-              "available_maps", "categories", "border")
+              "categories", "border")
 
 
 def create_app() -> Flask:
@@ -68,9 +68,8 @@ def create_app() -> Flask:
     @app.get("/api/fields/<field_id>/map")
     def api_field_map(field_id: str):
         field = _get_field(field_id)
-        map_name = _get_map_name(field)
-        map_geom = geo.get_map_geometry(
-            geo.FIELDS_DIR / field_id, map_name, field["file_name"])
+        # the displayed map is always the John Deere map of the field
+        map_geom = geo.get_field_map(geo.FIELDS_DIR / field_id)
         # one FeatureCollection: border + (if any) the map itself
         features = []
         if field["border"] is not None:
@@ -78,20 +77,13 @@ def create_app() -> Flask:
                              "properties": {"kind": "border"},
                              "geometry": field["border"]})
         if map_geom is not None:
-            if map_geom["kind"] == "Point":
-                features.append({"type": "Feature",
-                                 "properties": {"kind": "map"},
-                                 "geometry": map_geom["geometry"]})
-            else:
-                for feat in map_geom["fc"]["features"]:
-                    feat["properties"] = {"kind": "map"}
-                    features.append(feat)
+            for feat in map_geom["fc"]["features"]:
+                feat["properties"] = {"kind": "map"}
+                features.append(feat)
         return jsonify({
             "kind": map_geom["kind"] if map_geom else None,
             "total": map_geom["total"] if map_geom else 0,
             "shown": map_geom["shown"] if map_geom else 0,
-            "vertices": map_geom.get("vertices") if map_geom else None,
-            "vertices_shown": map_geom.get("vertices_shown") if map_geom else None,
             "fc": {"type": "FeatureCollection", "features": features},
         })
 

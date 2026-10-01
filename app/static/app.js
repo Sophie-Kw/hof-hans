@@ -64,7 +64,7 @@ const MapLegend = L.Control.extend({
     const div = L.DomUtil.create("div", "map-legend");
     div.innerHTML =
       '<div class="lg-row"><span class="lg-line"></span>Field border</div>' +
-      '<div class="lg-row"><span class="lg-fill"></span>Weeds (detected)</div>';
+      '<div class="lg-row"><span class="lg-fill"></span>Spray map</div>';
     L.DomEvent.disableClickPropagation(div);
     return div;
   },
@@ -179,9 +179,6 @@ const SEL_BORDER_STYLE = { color: "#111827", weight: 3, fill: false };
 const MAP_POLY_STYLE = {
   color: "#c2410c", weight: 1, fillColor: "#f97316", fillOpacity: 0.45,
 };
-const MAP_POINT_STYLE = {
-  radius: 3, color: "#9a3412", weight: 1, fillColor: "#fb923c", fillOpacity: 0.85,
-};
 
 function drawAllBorders() {
   layers.all.clearLayers();
@@ -206,9 +203,7 @@ async function drawCurrent({ fit = false } = {}) {
   const f = fieldById[state.fieldId];
   let res;
   try {
-    res = await (
-      await fetch(`/api/fields/${f.id}/map?map=${encodeURIComponent(mapNameForTerminal())}`)
-    ).json();
+    res = await (await fetch(`/api/fields/${f.id}/map`)).json();
   } catch (err) {
     console.error("map fetch failed", err);
     return;
@@ -221,11 +216,6 @@ async function drawCurrent({ fit = false } = {}) {
     if (feat.properties.kind === "border") {
       L.geoJSON(feat, { style: SEL_BORDER_STYLE, onEachFeature: onEach })
         .addTo(layers.current);
-    } else if (res.kind === "Point") {
-      L.geoJSON(feat, {
-        pointToLayer: (ll) => L.circleMarker(ll, MAP_POINT_STYLE),
-        onEachFeature: onEach,
-      }).addTo(layers.current);
     } else {
       L.geoJSON(feat, { style: MAP_POLY_STYLE, onEachFeature: onEach })
         .addTo(layers.current);
@@ -239,14 +229,9 @@ async function drawCurrent({ fit = false } = {}) {
 
 function setMapNote(res) {
   const note = $("map-note");
-  let text = "";
-  if (res.kind === "Point" && res.shown < res.total) {
-    text = `showing ${fmtNum(res.shown)} of ${fmtNum(res.total)} points (uniform sample)`;
-  } else if (res.vertices && res.vertices_shown < res.vertices) {
-    text = `simplified outline: ${fmtNum(res.vertices_shown)} of ${fmtNum(res.vertices)} vertices`;
-  } else if (res.kind === null) {
-    text = `No map data for ${mapNameForTerminal()} – showing the field border.`;
-  }
+  const text = res.kind === null
+    ? `No map data for this field – showing the field border.`
+    : "";
   note.textContent = text;
   note.hidden = !text;
 }
@@ -346,10 +331,10 @@ function bindUI() {
     $("raw-list-icon").textContent = collapsed ? "+" : "−";
   });
   $("terminal").addEventListener("change", (e) => {
+    // only the results change; the displayed map is always the same
     state.terminal = e.target.value;
     refreshList();
     updateResults();
-    drawCurrent({ fit: false });
   });
   $("section").addEventListener("change", (e) => {
     state.section = Number(e.target.value);
