@@ -44,18 +44,9 @@ hof-hans/
 └── README.md
 ```
 
-The app only reads `data/`, it never writes to it. Details on the data
-format: `data/README.md`.
-
+The app only reads `data/`, it never writes to it.
 If the data (or parts of it) is missing, the app does not start with an
-empty map but fails with a clear message, e.g.:
-
-```
-RuntimeError: The data folder is missing or incomplete:
-  - missing directory: /app/data/fields
-Put the geodata into the 'data' folder next to compose.yaml (fields/ and
-terminals.json, see README.md) and start again.
-```
+empty map but fails with a clear message.
 
 ## Local run without Docker
 
@@ -68,8 +59,7 @@ pip install -r requirements.txt
 python -m app
 ```
 
-Then open http://127.0.0.1:8080. The raw-data cache is then built in
-`.cache/` (git-ignored) instead of the Docker volume.
+Then open http://127.0.0.1:8080.
 
 ## Decisions & Assumptions
 - the displayed map is always the John Deere map of the field; the selected
