@@ -297,6 +297,9 @@ def get_raw_points(field_id: str, bbox: tuple, zoom: int) -> dict:
     min_x, min_y, max_x, max_y = bbox
     connection = sqlite3.connect(cache_path)
     try:
+        scale_min, scale_max = connection.execute(
+            "SELECT MIN(count), MAX(count) FROM raw_cells"
+        ).fetchone()
         if zoom < RAW_POINT_ZOOM:
             rows = connection.execute("""
             SELECT geometry, count, confidence
@@ -309,21 +312,6 @@ def get_raw_points(field_id: str, bbox: tuple, zoom: int) -> dict:
             features = _raw_cell_features(cell_rows)
             mode = "grid"
         else:
-            count = connection.execute("""
-                SELECT COUNT(*)
-                FROM raw_index
-                WHERE max_x >= ? AND min_x <= ? AND max_y >= ? AND min_y <= ?
-            """, (min_x, max_x, min_y, max_y)).fetchone()[0]
-            if zoom < RAW_POINT_ZOOM or count > RAW_MAX_POINTS:
-                rows = connection.execute("""
-                    SELECT geometry, count, confidence
-                    FROM raw_cells
-                    WHERE max_x >= ? AND min_x <= ?
-                      AND max_y >= ? AND min_y <= ?
-                """, (min_x, max_x, min_y, max_y))
-                features = _raw_cell_features(list(rows))
-                mode = "grid"
-            else:
                 rows = connection.execute("""
                 SELECT p.x, p.y, p.class_info, p.confidence, p.spray_r
                 FROM raw_index AS i
@@ -332,6 +320,7 @@ def get_raw_points(field_id: str, bbox: tuple, zoom: int) -> dict:
                   AND i.max_y >= ? AND i.min_y <= ?
                 """, (min_x, max_x, min_y, max_y))
                 features = [_raw_point_feature(row) for row in rows]
+                count = len(features)
                 mode = "points"
     finally:
         connection.close()
@@ -339,6 +328,8 @@ def get_raw_points(field_id: str, bbox: tuple, zoom: int) -> dict:
         "mode": mode,
         "total": count,
         "shown": len(features),
+        "scale_min": scale_min or 0,
+        "scale_max": scale_max or 0,
         "fc": {"type": "FeatureCollection", "features": features},
     }
 

@@ -64,6 +64,7 @@ const MapLegend = L.Control.extend({
   options: { position: "bottomright" },
   onAdd() {
     const div = L.DomUtil.create("div", "map-legend");
+    div.id = "map-legend";
     div.innerHTML =
       '<div class="lg-row"><span class="lg-line"></span>Field border</div>' +
       '<div class="lg-row"><span class="lg-fill"></span>Spray map</div>';
@@ -72,8 +73,35 @@ const MapLegend = L.Control.extend({
   },
 });
 
+function updateLegend(tab, minCount = 0, maxCount = 0) {
+  const legend = $("map-legend");
+  if (!legend) return;
+  if (tab === "raw") {
+    legend.innerHTML =
+      '<div class="lg-row"><span class="lg-line"></span>Field border</div>' +
+      '<div class="lg-density-title">Detections per cell</div>' +
+      '<div class="lg-gradient"></div>' +
+      '<div class="lg-scale-labels"><span id="lg-min">0</span>' +
+      '<span id="lg-max">0</span></div>';
+    $("lg-min").textContent = minCount.toLocaleString("en-US");
+    $("lg-max").textContent = maxCount.toLocaleString("en-US");
+    return;
+  }
+  if (tab === "raw-points") {
+    legend.innerHTML =
+      '<div class="lg-row"><span class="lg-line"></span>Field border</div>' +
+      '<div class="lg-row"><span class="lg-point"></span>Individual detections</div>';
+    return;
+  }
+  legend.innerHTML =
+    '<div class="lg-row"><span class="lg-line"></span>Field border</div>' +
+    '<div class="lg-row"><span class="lg-fill"></span>Spray map</div>';
+}
+
 function initMap() {
   map = L.map("map", { preferCanvas: true });
+  map.createPane("rawPane").style.zIndex = 410;
+  map.createPane("borderPane").style.zIndex = 650;
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap contributors",
@@ -168,6 +196,15 @@ const SEL_BORDER_STYLE = { color: "#111827", weight: 3, fill: false };
 const MAP_POLY_STYLE = {
   color: "#c2410c", weight: 1, fillColor: "#f97316", fillOpacity: 0.45,
 };
+const RAW_DENSITY_COLORS = [
+  "#fee9c0", "#fed37e", "#da7945", "#A84D1D", "#8c2d04",
+];
+
+function rawDensityColor(intensity) {
+  const value = Math.max(0, Math.min(1, intensity));
+  const index = Math.round(value * (RAW_DENSITY_COLORS.length - 1));
+  return RAW_DENSITY_COLORS[index];
+}
 
 function drawAllBorders() {
   layers.all.clearLayers();
@@ -175,6 +212,7 @@ function drawAllBorders() {
     if (!f.border) continue;
     L.geoJSON(f.border, {
       style: ALL_BORDER_STYLE,
+      pane: "borderPane",
       onEachFeature: (_ft, lyr) => { lyr.options.fieldId = f.id; },
     }).addTo(layers.all);
   }
@@ -201,9 +239,13 @@ async function drawCurrent({ fit = false } = {}) {
 
   layers.current.clearLayers();
   const onEach = (_ft, lyr) => { lyr.options.fieldId = f.id; };
-  for (const feat of res.fc.features) {
+    for (const feat of res.fc.features) {
     if (feat.properties.kind === "border") {
-      L.geoJSON(feat, { style: SEL_BORDER_STYLE, onEachFeature: onEach })
+      L.geoJSON(feat, {
+        style: SEL_BORDER_STYLE,
+        pane: "borderPane",
+        onEachFeature: onEach,
+      })
         .addTo(layers.current);
     } else {
       L.geoJSON(feat, { style: MAP_POLY_STYLE, onEachFeature: onEach })
@@ -266,7 +308,10 @@ function selectRawField(id) {
   layers.current.clearLayers();
   layers.raw.clearLayers();
   if (f.border) {
-    L.geoJSON(f.border, { style: SEL_BORDER_STYLE }).addTo(layers.current);
+    L.geoJSON(f.border, {
+      style: SEL_BORDER_STYLE,
+      pane: "borderPane",
+    }).addTo(layers.current);
     map.fitBounds(L.geoJSON(f.border).getBounds(), { padding: [20, 20] });
   }
   const info = $("raw-info");
@@ -313,23 +358,28 @@ async function loadRawMap() {
 
   layers.raw.clearLayers();
   if (res.mode === "grid") {
-    const maxCount = Math.max(
-      ...res.fc.features.map((feature) => feature.properties.count || 1)
-    );
+    const minCount = res.scale_min || 0;
+    const maxCount = res.scale_max || 0;
+    const countRange = maxCount - minCount;
+    updateLegend("raw", minCount, maxCount);
     L.geoJSON(res.fc, {
+      pane: "rawPane",
       style: (feature) => {
         const count = feature.properties.count || 1;
-        const intensity = Math.sqrt(count / maxCount);
+        const intensity = countRange === 0
+          ? 1
+          : (count - minCount) / countRange;
         return {
-          color: "#ffffff",
-          weight: 0.2,
-          opacity: 0.25,
-          fillColor: "#f97316",
-          fillOpacity: 0.35 + intensity * 0.6,
+          color: rawDensityColor(intensity),
+          weight: 0.3,
+          opacity: 1,
+          fillColor: rawDensityColor(intensity),
+          fillOpacity: 1,
         };
       },
     }).addTo(layers.raw);
   } else {
+    updateLegend("raw-points");
     L.geoJSON(res.fc, {
       pointToLayer: (_feature, latlng) => L.circleMarker(latlng, {
         radius: 3,
@@ -337,20 +387,22 @@ async function loadRawMap() {
         weight: 1,
         fillColor: "#f97316",
         fillOpacity: 0.55,
+        pane: "rawPane",
       }),
     }).addTo(layers.raw);
   }
 
   const note = $("map-note");
   note.textContent = res.mode === "grid"
-    ? `Density grid representing ${res.total.toLocaleString("en-US")} detections in visible cells (${res.shown.toLocaleString("en-US")} cells), zoom ${map.getZoom()}. Points appear at maximum zoom when the area is sparse enough.`
-    : `Showing ${res.shown.toLocaleString("en-US")} detections at zoom ${map.getZoom()}.`;
+    ? `Density grid representing ${res.total.toLocaleString("en-US")} detections in visible cells. Single detections appear as points at maximum zoom.`
+    : `Showing ${res.shown.toLocaleString("en-US")} detections.`;
   note.hidden = false;
 }
 
 function setTab(tab) {
   if (state.tab === tab) return;
   state.tab = tab;
+  updateLegend(tab);
   $("panel-fields").hidden = tab !== "fields";
   $("panel-raw").hidden = tab !== "raw";
   $("tab-fields").classList.toggle("active", tab === "fields");

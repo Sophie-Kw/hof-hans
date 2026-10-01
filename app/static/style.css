@@ -241,3 +241,29 @@ body {
   border: 1px solid #c2410c;
   border-radius: 2px;
 }
+.lg-point {
+  width: 9px;
+  height: 9px;
+  background: #f97316;
+  border: 1px solid #7c2d12;
+  border-radius: 50%;
+}
+.lg-density-title {
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.lg-gradient {
+  width: 120px;
+  height: 10px;
+  margin-top: 4px;
+  background: linear-gradient(to right,
+    #fff7bc, #fec44f, #fe9929, #ec7014, #8c2d04);
+}
+.lg-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 120px;
+  font-size: 10px;
+  color: #6b7280;
+}
