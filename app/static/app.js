@@ -148,21 +148,6 @@ function updateResults() {
     area == null
       ? "sprays – of – ha"
       : `sprays ${area.toFixed(2)} of ${f.area_ha.toFixed(1)} ha`;
-  const plants = f.plants_in_field == null ? "–" : fmtNum(f.plants_in_field);
-  const flown =
-    f.covered_area_ha != null && f.area_ha
-      ? `${Math.round((f.covered_area_ha / f.area_ha) * 100)} % flown`
-      : "– % flown";
-  $("res-plants").textContent = `${plants} plants · ${flown}`;
-
-  const note = $("res-note");
-  if (sav != null && sav < 1) {
-    note.textContent =
-      "Simplified map – essentially the whole field is sprayed.";
-    note.hidden = false;
-  } else {
-    note.hidden = true;
-  }
 }
 
 function onMapClick(e) {
