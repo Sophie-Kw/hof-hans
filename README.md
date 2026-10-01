@@ -12,7 +12,7 @@ expects.
 - interactive map on the right
 - terminal + section width selection (9 terminals, 25/50/100/300 cm)
 - results panel: herbicide saved in %, sprayed area, plants + coverage
-- download button: ZIP with the terminal folder (e.g. `John_Deere/Rx/`),
+- download button: ZIP with the terminal folder (e.g. `John_Deere/`) and boder shapefile (`Field_boder/`),
   ready for the USB stick
 
 **Raw Data tab (lightweight, first step of the big detection view)**

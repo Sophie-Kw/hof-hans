@@ -109,10 +109,12 @@ def create_app() -> Flask:
         zip_path = app.tmp_dir / f"{field['file_name']}_{map_name}.zip"
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for src in sorted((field_dir / map_name).rglob("*")):
-                if src.is_file() and not src.name.startswith("."):
-                    arc = Path(map_name) / src.relative_to(field_dir / map_name)
-                    zf.write(src, arc)
+            for folder_name in (map_name, "Field_border"):
+                folder = field_dir / folder_name
+                for src in sorted(folder.rglob("*")):
+                    if src.is_file() and not src.name.startswith("."):
+                        arc = Path(folder_name) / src.relative_to(folder)
+                        zf.write(src, arc)
 
         return send_file(zip_path, as_attachment=True,
                          download_name=f"{field['file_name']}_{map_name}.zip")
