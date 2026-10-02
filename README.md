@@ -9,14 +9,15 @@ expects.
 
 Docker (with the `docker compose` plugin) is the only requirement.
 
-1. Put the data into place (see [Data](#data)).
-2. Start:
+1. Clone the repository.
+2. Put the data into place (see [Data](#data)).
+3. Start:
 
    ```
    docker compose up --build
    ```
 
-3. Open http://localhost:8080 and stop with `Ctrl+C` (or `docker compose down`).
+4. Open http://localhost:8080 and stop with `Ctrl+C` (or `docker compose down`).
 
 <!-- Notes:
 - the first Raw Data request on field 19 builds an internal SQLite cache from
